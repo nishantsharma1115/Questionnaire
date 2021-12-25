@@ -113,8 +113,8 @@ class QuestionListActivity : AppCompatActivity() {
             }
         )
 
-        questionViewModel.getAverageViewCount.observe(this, { binding.averageViewCount = it })
-        questionViewModel.getAverageAnsCount.observe(this, { binding.averageAnsCount = it })
+        questionViewModel.getAverageViewCount.observe(this) { binding.averageViewCount = it }
+        questionViewModel.getAverageAnsCount.observe(this) { binding.averageAnsCount = it }
     }
 
     private fun updateUI(listOfQuestion: List<Item>) {

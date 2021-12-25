@@ -8,24 +8,22 @@ import com.nishant.questionnaire.model.Item
 import com.nishant.questionnaire.model.QuestionResponse
 import com.nishant.questionnaire.repositories.QuestionRepository
 import com.nishant.questionnaire.util.Resource
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class QuestionViewModel(
-    private val questionRepository: QuestionRepository = QuestionRepository()
+    private val questionRepository: QuestionRepository = QuestionRepository(),
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private var _getQuestionStatus = MutableLiveData<Resource<QuestionResponse>>()
     val getQuestionStatus: LiveData<Resource<QuestionResponse>> = _getQuestionStatus
     fun getQuestions() {
         _getQuestionStatus.postValue(Resource.Loading())
-        viewModelScope.launch(Dispatchers.IO) {
-            questionRepository.getQuestions(
-                successCallBack = {
-                    _getQuestionStatus.postValue(Resource.Success(it))
-                }, failureResponse = {
-                    _getQuestionStatus.postValue(Resource.Error(it))
-                })
+        viewModelScope.launch(dispatcher) {
+            val apiResult = questionRepository.getQuestions()
+            _getQuestionStatus.postValue(apiResult)
         }
     }
 
@@ -35,7 +33,7 @@ class QuestionViewModel(
     private var _getAverageAnsCount = MutableLiveData<String>()
     val getAverageAnsCount: LiveData<String> = _getAverageAnsCount
 
-    fun calculateAverages(list: List<Item>) = viewModelScope.launch(Dispatchers.IO) {
+    fun calculateAverages(list: List<Item>) = viewModelScope.launch(dispatcher) {
         var viewCount = 0
         var ansCount = 0
         list.forEach {
